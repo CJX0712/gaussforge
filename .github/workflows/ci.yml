@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install deps
+        run: pip install -r requirements.txt ruff pytest pytest-cov
+      - name: Lint
+        run: ruff check gaussforge tests examples
+      - name: Tests
+        run: pytest tests -q -W ignore::UserWarning --cov=gaussforge --cov-report=term
+      - name: Demo smoke (budget-reduced)
+        env:
+          ENV_GF_N_TRIALS: "6"
+          ENV_GF_SEEDS: "0,1"
+        run: python examples/run_demo.py
+      - name: Determinism smoke
+        env:
+          ENV_GF_N_TRIALS: "4"
+          ENV_GF_SEEDS: "0"
+        run: python -m gaussforge.cli determinism
