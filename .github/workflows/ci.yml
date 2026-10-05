@@ -18,7 +18,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - name: Install deps
-        run: pip install -r requirements.txt ruff pytest pytest-cov
+        run: pip install -r requirements.txt -e . ruff pytest pytest-cov
       - name: Lint
         run: ruff check gaussforge tests examples
       - name: Tests
